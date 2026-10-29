@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Library Inventory Management using Set Operations</title>
+<style>
+:root{--bg:#fff7f6;--card:#fff;--tx:#2b1618;--mu:#8a6467;--ac:#c4283a;--dk:#8e1426;--soft:#fde6e6;--bd:#f3d3d3;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1b0e10;--card:#2a1619;--tx:#fbeeee;--mu:#c9a0a3;--ac:#ff6677;--dk:#ff8f9b;--soft:#3b1d21;--bd:#4d2a2e}}
+:root[data-theme=dark]{--bg:#1b0e10;--card:#2a1619;--tx:#fbeeee;--mu:#c9a0a3;--ac:#ff6677;--dk:#ff8f9b;--soft:#3b1d21;--bd:#4d2a2e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.65 system-ui,sans-serif;transition:background .3s}
+.hero{background:linear-gradient(135deg,#6e0d1c,#c4283a 60%,#e8505b);color:#fff;text-align:center;padding:44px 20px 70px}
+.hero h1{margin:0;font:700 clamp(24px,5vw,38px)/1.2 Georgia,serif}.hero p{margin:10px auto 0;max-width:520px;opacity:.9}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;margin:-28px auto 0;width:max-content;max-width:94%;background:var(--card);border-radius:40px;padding:6px;display:flex;gap:2px;overflow-x:auto;box-shadow:0 8px 24px #8e142640}
+nav button{border:0;background:none;color:var(--tx);padding:9px 16px;border-radius:30px;cursor:pointer;font:600 14px system-ui;white-space:nowrap;transition:.25s}
+nav button.on{background:var(--ac);color:#fff}
+main{max-width:860px;margin:28px auto;padding:0 16px 60px}
+.tab{display:none;animation:in .45s ease}.tab.on{display:block}@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 4px 16px #c4283a12}
+h2{font:700 22px Georgia,serif;margin:0 0 4px;color:var(--ac)}.sub{color:var(--mu);margin:0 0 14px;font-size:14px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.stat{flex:1;min-width:110px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px;text-align:center;font-size:13px;color:var(--mu);transition:.25s}
+.stat:hover{transform:translateY(-4px)}.stat b{display:block;font:700 28px Georgia,serif;color:var(--ac)}
+.pills{display:flex;gap:10px;flex-wrap:wrap}
+.pill{border:2px solid var(--bd);background:var(--card);color:var(--tx);border-radius:30px;padding:9px 18px;cursor:pointer;font:600 15px system-ui;transition:.25s}
+.pill:hover{border-color:var(--ac);transform:translateY(-2px)}.pill.on{background:var(--ac);border-color:var(--ac);color:#fff;box-shadow:0 6px 14px #c4283a55}
+.formula{font:700 19px Georgia,serif;color:var(--dk);background:var(--soft);border-radius:14px;padding:12px 16px;margin-top:16px}
+.split{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:20px;align-items:start}@media(max-width:680px){.split{grid-template-columns:1fr}}
+svg circle{cursor:pointer;transition:.25s}svg circle:hover{fill-opacity:.6}svg text{pointer-events:none;font-family:system-ui}
+.books{display:grid;gap:8px;max-height:340px;overflow:auto}
+.book{background:var(--soft);border-radius:12px;padding:8px 12px;font-size:14px;animation:in .3s}.book small{display:block;color:var(--mu)}
+.hint{color:var(--mu);font-size:13px;margin-top:10px}
+input,textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;width:100%;margin-bottom:10px}
+.go{background:var(--ac);color:#fff;border:0;border-radius:30px;padding:10px 22px;font:600 15px system-ui;cursor:pointer;transition:.25s}.go:hover{background:var(--dk);transform:translateY(-2px)}
+.ghost{background:none;border:1px solid var(--bd);border-radius:30px;padding:8px 16px;color:var(--tx);cursor:pointer;font:inherit}
+.cat{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.item{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;transition:.25s}.item:hover{transform:translateY(-4px);box-shadow:0 8px 18px #c4283a22}
+.item b{display:block}.item small{color:var(--mu)}.tag{display:inline-block;background:var(--ac);color:#fff;border-radius:10px;padding:0 9px;font-size:12px;margin:6px 4px 6px 0}
+.mini{border:0;background:var(--soft);border-radius:8px;cursor:pointer;padding:4px 9px}
+details{border:1px solid var(--bd);border-radius:16px;margin-bottom:12px;background:var(--card);overflow:hidden}
+summary{cursor:pointer;padding:14px 18px;font:700 17px Georgia,serif;color:var(--ac)}details>div{padding:0 18px 16px}
+table{border-collapse:collapse;width:100%}td,th{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left}
+pre{background:var(--soft);padding:12px;border-radius:12px;overflow-x:auto;font-size:13px}
+.pr{border-left:4px solid var(--ac);padding:2px 0 2px 14px;margin:16px 0}
+</style></head><body>
+<div class="hero"><h1>📚 Library Inventory Management</h1><p>Explore books across sections using set operations: union, intersection, difference and more.</p></div>
+<nav id="nav"></nav>
+<main>
+
+<div class="tab on" id="t0">
+<div class="stats" id="stats"></div>
+<div class="card"><h2>① Choose sections</h2><p class="sub">Pick two or three.</p><div class="pills" id="secs"></div>
+<h2 style="margin-top:22px">② Choose an operation</h2><p class="sub">The result updates instantly.</p><div class="pills" id="ops"></div>
+<div class="formula" id="formula"></div><div id="verdict"></div></div>
+<div class="card split"><div><svg id="venn" viewBox="0 0 340 300" width="100%"></svg><p class="hint">👆 Tap a region of the diagram to see its books.</p></div>
+<div><h2 id="rt" style="font-size:18px"></h2><div class="books" id="rl"></div></div></div></div>
+
+<div class="tab" id="t1"><div class="card"><h2>Add a book</h2><p class="sub">Choose the sections it belongs to.</p>
+<input id="bt" placeholder="Title"><input id="ba" placeholder="Author"><input id="bi" placeholder="ISBN">
+<div class="pills" id="bsec" style="margin-bottom:16px"></div><button class="go" id="sv" onclick="save()">Add book</button></div>
+<input id="q" placeholder="🔍 Search by title, author or ISBN" oninput="drawCat()"><div class="cat" id="cat"></div></div>
+
+<div class="tab" id="t2"><div class="card"><h2>❌ Missing Books</h2><p class="sub" id="misscount"></p><div class="books" id="misslist"></div></div>
+<div class="card"><h2>📑 Duplicate Entries</h2><p class="sub" id="dupcount"></p><div class="books" id="duplist"></div></div>
+<div class="card"><h2 style="font-size:18px">Shelf check</h2><p class="sub">Tick every book you physically found on the shelf. Anything unticked is missing (Catalog − Shelf).</p><div class="cat" id="checks"></div></div></div>
+
+<div class="tab" id="t3"><div class="card"><h2>Whole Library</h2><p class="sub">A complete overview of every section and book.</p><div class="stats" id="libstats" style="margin:0"></div></div>
+<div class="card"><h2 style="font-size:18px">Where the books sit</h2><p class="sub">Each unique book belongs to exactly one group below.</p><div class="wrap" id="libgroups"></div></div>
+<div class="card"><h2 style="font-size:18px">All books</h2><p class="sub">One row per unique ISBN. Copies above 1 are duplicates.</p><div class="wrap" id="libtable"></div></div></div>
+
+<div class="tab" id="t4"><div class="card"><h2>Team</h2><table><tr><th>Member</th><th>Contribution</th></tr><tr><td>Vaishnavi Gursal</td><td>Report</td></tr><tr><td>Tanmay More</td><td>Algorithms</td></tr>
+<tr><td>Asawari Gaikwad</td><td>Website</td></tr><tr><td>Ishwari Labade</td><td>Problems &amp; PPT</td></tr></table>
+<h2 style="margin-top:20px;font-size:18px">References</h2><ol><li>K. H. Rosen, Discrete Mathematics and Its Applications</li><li>Cormen et al., Introduction to Algorithms</li><li>Lipschutz &amp; Lipson, Schaum's Outline of Discrete Mathematics</li></ol></div></div>
+</main>
+<script>
+/* ===== DATA (in memory): a section is the set of ISBNs tagged with it ===== */
+const NAMES={F:'Fiction',N:'Non-Fiction',R:'Reference'};
+let uid=0,editId=null;
+const mk=(t,a,i,s)=>({id:uid++,t,a,i,s:s.split('')});
+let books=[mk('Godan','Premchand','9788110000004','F'),
+mk('Godan (2nd copy)','Premchand','9788110000004','F'),
+mk('Gaban','Premchand','9788110013738','F'),
+mk('Nirmala','Premchand','9788110027469','F'),
+mk('The Guide','R. K. Narayan','9788110041199','F'),
+mk('Malgudi Days','R. K. Narayan','9788110054922','F'),
+mk('Malgudi Days (2nd copy)','R. K. Narayan','9788110054922','F'),
+mk('Swami and Friends','R. K. Narayan','9788110068653','F'),
+mk('The God of Small Things','Arundhati Roy','9788110082383','F'),
+mk('Midnight\'s Children','Salman Rushdie','9788110096113','F'),
+mk('The Namesake','Jhumpa Lahiri','9788110109844','F'),
+mk('A Suitable Boy','Vikram Seth','9788110123574','F'),
+mk('The Shadow Lines','Amitav Ghosh','9788110137304','F'),
+mk('Anandamath','Bankim Chandra Chatterjee','9788110151034','F'),
+mk('Devdas','Sarat Chandra Chattopadhyay','9788110164768','F'),
+mk('Chokher Bali','Rabindranath Tagore','9788110178499','F'),
+mk('The Home and the World','Rabindranath Tagore','9788110192228','F'),
+mk('Five Point Someone','Chetan Bhagat','9788110205959','F'),
+mk('2 States','Chetan Bhagat','9788110219680','F'),
+mk('The White Tiger','Aravind Adiga','9788110233419','F'),
+mk('Chitralekha','Bhagwati Charan Verma','9788110247140','F'),
+mk('Madhushala','Harivansh Rai Bachchan','9788110260873','F'),
+mk('Kamayani','Jaishankar Prasad','9788110274603','F'),
+mk('Gunahon Ka Devta','Dharamvir Bharati','9788110288334','F'),
+mk('Raag Darbari','Shrilal Shukla','9788110302061','F'),
+mk('Ponniyin Selvan','Kalki Krishnamurthy','9788110315795','F'),
+mk('Sacred Games','Vikram Chandra','9788110329525','F'),
+mk('The Palace of Illusions','Chitra Banerjee Divakaruni','9788110343255','F'),
+mk('Mrityunjaya','Shivaji Sawant','9788110356989','F'),
+mk('Shyamchi Aai','Sane Guruji','9788110370718','F'),
+mk('Batatyachi Chal','P. L. Deshpande','9788110384449','F'),
+mk('Yayati','V. S. Khandekar','9788110398170','F'),
+mk('Train to Pakistan','Khushwant Singh','9788110411909','FN'),
+mk('My Days','R. K. Narayan','9788110425630','FN'),
+mk('Gitanjali','Rabindranath Tagore','9788110439361','FN'),
+mk('Panchatantra','Vishnu Sharma','9788110453091','FR'),
+mk('Mahabharata','Ved Vyasa','9788110466824','FR'),
+mk('Ramayana','Valmiki','9788110480554','FR'),
+mk('Wings of Fire','A. P. J. Abdul Kalam','9788110494285','N'),
+mk('Wings of Fire (2nd copy)','A. P. J. Abdul Kalam','9788110494285','N'),
+mk('Ignited Minds','A. P. J. Abdul Kalam','9788110508012','N'),
+mk('The Story of My Experiments with Truth','M. K. Gandhi','9788110521745','N'),
+mk('India After Gandhi','Ramachandra Guha','9788110535476','N'),
+mk('An Uncertain Glory','Amartya Sen & Jean Dreze','9788110549206','N'),
+mk('Hind Swaraj','M. K. Gandhi','9788110562939','N'),
+mk('The Argumentative Indian','Amartya Sen','9788110576660','N'),
+mk('Playing It My Way','Sachin Tendulkar','9788110590390','N'),
+mk('Annihilation of Caste','B. R. Ambedkar','9788110604127','N'),
+mk('India Unbound','Gurcharan Das','9788110617851','N'),
+mk('Autobiography of a Yogi','Paramahansa Yogananda','9788110631581','N'),
+mk('Why I Am an Atheist','Bhagat Singh','9788110645311','N'),
+mk('Glimpses of World History','Jawaharlal Nehru','9788110659042','N'),
+mk('Arthashastra','Kautilya','9788110672775','NR'),
+mk('Bhagavad Gita','Ved Vyasa','9788110686505','NR'),
+mk('The Discovery of India','Jawaharlal Nehru','9788110700232','NR'),
+mk('Indian Polity','M. Laxmikanth','9788110713966','R'),
+mk('Indian Polity (2nd copy)','M. Laxmikanth','9788110713966','R'),
+mk('Constitution of India','Government of India','9788110727697','R'),
+mk('Oxford Hindi-English Dictionary','R. S. McGregor','9788110741426','R'),
+mk('India Year Book','Publications Division','9788110755157','R'),
+mk('Manorama Year Book','Malayala Manorama','9788110768881','R'),
+mk('Encyclopaedia of Indian Literature','Sahitya Akademi','9788110782610','R'),
+mk('Atlas of India','Survey of India','9788110796341','R'),
+mk('Concise Dictionary of Indian Philosophy','John Grimes','9788110810078','R'),
+mk('Brihat Hindi Kosh','Kalika Prasad','9788110823801','R'),
+mk('Marathi Shabdakosh','Y. R. Date','9788110837532','R')];
+const $=id=>document.getElementById(id);
+const sec=k=>new Set(books.filter(b=>b.s.includes(k)).map(b=>b.i));
+const U=()=>new Set(books.map(b=>b.i));
+const card=i=>{const b=books.find(x=>x.i===i);return `<div class="book">${b?b.t:i}<small>${b?b.a:'not in catalog'}</small></div>`};
+const list=s=>s.size?[...s].map(card).join(''):'<i>∅ empty set</i>';
+
+/* ===== SET OPERATIONS ===== */
+const union=(A,B)=>new Set([...A,...B]),inter=(A,B)=>new Set([...A].filter(x=>B.has(x)));
+const diff=(A,B)=>new Set([...A].filter(x=>!B.has(x))),sym=(A,B)=>union(diff(A,B),diff(B,A));
+
+/* ===== TABS ===== */
+const TABS=['Explore','Catalog','Audit','Library','Team'];
+$('nav').innerHTML=TABS.map((t,i)=>`<button id="n${i}" onclick="tab(${i})">${t}</button>`).join('')+'<button id="th">🌓</button>';
+function tab(i){TABS.forEach((_,j)=>{$('t'+j).classList.toggle('on',i==j);$('n'+j).classList.toggle('on',i==j)});}
+
+/* ===== EXPLORE ===== */
+let pick=['F','N'],op='inter',chosen=[],result=new Set();
+const OPS={union:'Union ∪',inter:'Intersection ∩',diff:'Difference −',sym:'Sym. difference Δ',comp:'Complement',chk:'Subset / Disjoint'};
+const COL=['#e8505b','#8e1426','#ff9aa2'],CS=[[125,120],[215,120],[170,195]];
+function pills(){
+ $('secs').innerHTML=Object.entries(NAMES).map(([k,v])=>`<button class="pill ${pick.includes(k)?'on':''}" onclick="toggle('${k}')">${v}</button>`).join('');
+ $('ops').innerHTML=Object.entries(OPS).map(([k,v])=>`<button class="pill ${op==k?'on':''}" onclick="op='${k}';run()">${v}</button>`).join('');}
+function toggle(k){pick=pick.includes(k)?pick.filter(x=>x!=k):[...pick,k];if(pick.length<2)pick=[k,Object.keys(NAMES).find(x=>x!=k)];run();}
+function stats(){
+ const sh=[...U()].filter(i=>Object.keys(NAMES).filter(k=>sec(k).has(i)).length>1).length;
+ $('stats').innerHTML=[['Entries',books.length],['Unique books',U().size],['Shared',sh],['Duplicates',books.length-U().size]].map(([l,v])=>`<div class="stat"><b>${v}</b>${l}</div>`).join('');}
+function run(){
+ pills();stats();chosen=[...pick];
+ const S=chosen.map(sec),n=chosen.map(k=>NAMES[k]),sy={union:'∪',inter:'∩',sym:'Δ'};let f,v='';
+ if(sy[op]){result=S.reduce((a,b)=>op=='union'?union(a,b):op=='inter'?inter(a,b):sym(a,b));f=`|${n.join(' '+sy[op]+' ')}| = ${result.size}`;
+  if(op=='union'&&S.length==2)f=`|A ∪ B| = |A| + |B| − |A ∩ B| = ${S[0].size} + ${S[1].size} − ${inter(S[0],S[1]).size} = ${result.size}`;}
+ else if(op=='diff'){result=S.slice(1).reduce(diff,S[0]);f=`|${n.join(' − ')}| = ${result.size}`;}
+ else if(op=='comp'){const u=S.reduce(union);result=diff(U(),u);f=`|(${n.join(' ∪ ')})ᶜ| = ${U().size} − ${u.size} = ${result.size}`;}
+ else{result=inter(S[0],S[1]);f=`|${n[0]} ∩ ${n[1]}| = ${result.size}`;
+  v=`<p>${n[0]} ⊆ ${n[1]}: <b>${diff(S[0],S[1]).size==0}</b> · ${n[1]} ⊆ ${n[0]}: <b>${diff(S[1],S[0]).size==0}</b> · Disjoint: <b>${result.size==0}</b></p>`;}
+ lib();audit();$('formula').textContent=f;$('verdict').innerHTML=v;$('rt').textContent=`Result · ${result.size} book(s)`;$('rl').innerHTML=list(result);venn();}
+
+/* ===== VENN: circles; click detects which circles contain the point ===== */
+const P3={1:[85,105],2:[255,105],3:[170,95],4:[170,262],5:[118,172],6:[222,172],7:[170,142]},P2={1:[95,150],2:[245,150],3:[170,150]};
+const region=m=>new Set([...U()].filter(i=>chosen.every((k,j)=>sec(k).has(i)===!!(m>>j&1))));
+function venn(){
+ let h=chosen.map((k,j)=>`<circle cx="${CS[j][0]}" cy="${CS[j][1]}" r="85" fill="${COL[j]}" fill-opacity=".35" stroke="${COL[j]}" stroke-width="3"/>
+ <text x="${[48,292,170][j]}" y="${[36,36,292][j]}" text-anchor="middle" font-weight="700" fill="${COL[j]}">${NAMES[k]}</text>`).join('');
+ for(let m=1;m<1<<chosen.length;m++){const r=region(m),inR=r.size&&[...r].every(x=>result.has(x)),p=(chosen.length==2?P2:P3)[m];
+  h+=`<text x="${p[0]}" y="${p[1]}" text-anchor="middle" font-size="20" font-weight="${inR?800:400}" fill="${inR?'var(--ac)':'var(--tx)'}">${r.size}</text>`;}
+ $('venn').innerHTML=h;}
+$('venn').addEventListener('click',e=>{
+ const r=$('venn').getBoundingClientRect(),k=340/r.width,x=(e.clientX-r.left)*k,y=(e.clientY-r.top)*k;let m=0;
+ chosen.forEach((_,j)=>{if((x-CS[j][0])**2+(y-CS[j][1])**2<=7225)m|=1<<j;});
+ const reg=m?region(m):diff(U(),chosen.map(sec).reduce(union));
+ $('rt').textContent=(m?chosen.filter((_,j)=>m>>j&1).map(k=>NAMES[k]).join(' ∩ ')+(m==(1<<chosen.length)-1?'':' only'):'Outside')+` · ${reg.size}`;$('rl').innerHTML=list(reg);});
+
+/* ===== WHOLE LIBRARY OVERVIEW ===== */
+function lib(){
+ const ks=Object.keys(NAMES),us=[...U()],mem=i=>ks.filter(k=>sec(k).has(i)),copies=i=>books.filter(b=>b.i===i).length;
+ // top cards: size of each section and how many of its books are exclusive to it
+ $('libstats').innerHTML=ks.map(k=>`<div class="stat"><b>${sec(k).size}</b>${NAMES[k]}<br>${us.filter(i=>mem(i).join()==k).length} only here</div>`).join('')+
+  `<div class="stat"><b>${us.length}</b>Unique books<br>${books.length} entries</div>`;
+ // group unique books by the exact set of sections they belong to (the Venn regions)
+ const g={};us.forEach(i=>{const m=mem(i).map(k=>NAMES[k]).join(' ∩ ');(g[m]=g[m]||[]).push(i)});
+ $('libgroups').innerHTML='<table><tr><th>Region</th><th>Books</th><th>Count</th></tr>'+Object.entries(g).map(([m,l])=>
+  `<tr><td><b>${m.includes('∩')?m:m+' only'}</b></td><td>${l.map(i=>books.find(b=>b.i===i).t).join(', ')}</td><td>${l.length}</td></tr>`).join('')+'</table>';
+ $('libtable').innerHTML='<table><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Sections</th><th>Copies</th></tr>'+us.map(i=>{const b=books.find(x=>x.i===i);
+  return `<tr><td>${b.t}</td><td>${b.a}</td><td>${i}</td><td>${mem(i).map(k=>`<span class="tag">${NAMES[k]}</span>`).join('')}</td><td>${copies(i)>1?'<b style="color:var(--ac)">'+copies(i)+'</b>':1}</td></tr>`}).join('')+'</table>';
+}
+
+/* ===== AUDIT: missing = Catalog - Shelf (shelf = ticked books) ===== */
+let found=null; // set of ISBNs found on the shelf
+function audit(){
+ if(!found)found=new Set([...U()].filter(i=>!['9788110796341','9788110508012'].includes(i))); // sample: Atlas of India + Ignited Minds missing
+ const miss=diff(U(),found);
+ $('misscount').textContent=miss.size?`${miss.size} book(s) in the catalog were not found on the shelf.`:'Nothing missing. Every cataloged book was found.';
+ $('misslist').innerHTML=list(miss);
+ // duplicates: same ISBN entered more than once inside the same section
+ const d={};books.forEach(b=>b.s.forEach(k=>(d[k+b.i]=d[k+b.i]||[]).push(b)));
+ const dups=Object.entries(d).filter(([,v])=>v.length>1);
+ $('dupcount').textContent=dups.length?`${dups.length} duplicate group(s) found. Each counts once in the set.`:'No duplicate entries found.';
+ $('duplist').innerHTML=dups.length?dups.map(([k,v])=>`<div class="book">${v[0].t}<small>${NAMES[k[0]]} · ISBN ${v[0].i} · entered ${v.length} times (${v.map(b=>b.t).join(' / ')})</small></div>`).join(''):'<i>None</i>';
+ $('checks').innerHTML=[...U()].map(i=>{const b=books.find(x=>x.i===i);return `<label class="item" style="cursor:pointer;display:block"><input type="checkbox" style="width:auto;margin:0 8px 0 0" ${found.has(i)?'checked':''} onchange="this.checked?found.add('${i}'):found.delete('${i}');audit()">${b.t}<br><small>${b.a}</small></label>`}).join('');}
+
+/* ===== CATALOG ===== */
+let bpick=[];
+function bpills(){$('bsec').innerHTML=Object.entries(NAMES).map(([k,v])=>`<button class="pill ${bpick.includes(k)?'on':''}" onclick="bpick=bpick.includes('${k}')?bpick.filter(x=>x!='${k}'):[...bpick,'${k}'];bpills()">${v}</button>`).join('');}
+function drawCat(){const q=$('q').value.toLowerCase();
+ $('cat').innerHTML=books.filter(b=>(b.t+b.a+b.i).toLowerCase().includes(q)).map(b=>`<div class="item"><b>${b.t}</b><small>${b.a} · ${b.i}</small><div>${b.s.map(k=>`<span class="tag">${NAMES[k]}</span>`).join('')}</div>
+ <button class="mini" onclick="edit(${b.id})">✎ Edit</button> <button class="mini" onclick="del(${b.id})">🗑 Delete</button></div>`).join('');}
+function save(){
+ if(!$('bt').value||!$('bi').value||!bpick.length)return alert('Please add a title, ISBN and at least one section.');
+ const o={t:$('bt').value,a:$('ba').value,i:$('bi').value.trim(),s:[...bpick]};
+ editId!==null?Object.assign(books.find(b=>b.id===editId),o):books.push({id:uid++,...o});
+ editId=null;$('sv').textContent='Add book';['bt','ba','bi'].forEach(x=>$(x).value='');bpick=[];bpills();drawCat();run();}
+function edit(id){const b=books.find(x=>x.id===id);editId=id;$('bt').value=b.t;$('ba').value=b.a;$('bi').value=b.i;bpick=[...b.s];bpills();$('sv').textContent='Save changes';scrollTo({top:0,behavior:'smooth'});}
+function del(id){books=books.filter(b=>b.id!==id);drawCat();run();}
+
+$('th').onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme=='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=d?'light':'dark';};
+tab(0);bpills();drawCat();run();lib();audit();
+</script></body></html>
